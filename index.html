@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>La Presse – Actualités</title>
 
-<!-- Rafraîchissement automatique toutes les 10 minutes -->
 <meta http-equiv="refresh" content="600">
 
 <style>
@@ -67,13 +66,15 @@
 
 <script>
 const RSS = "https://www.lapresse.ca/rss/actualites.xml";
-const PROXY = "https://corsproxy.io/?";
+const PROXY = "https://api.allorigins.win/get?url=";
 
 function loadNews() {
     fetch(PROXY + encodeURIComponent(RSS))
-        .then(r => r.text())
-        .then(str => (new DOMParser()).parseFromString(str, "text/xml"))
-        .then(xml => {
+        .then(r => r.json())
+        .then(data => {
+            const xmlString = data.contents;
+            const xml = new DOMParser().parseFromString(xmlString, "text/xml");
+
             const items = xml.querySelectorAll("item");
             let html = "";
 
@@ -81,7 +82,6 @@ function loadNews() {
                 if (i < 4) {
                     const title = item.querySelector("title")?.textContent || "Titre non disponible";
 
-                    // Image dans <enclosure>
                     const enclosure = item.querySelector("enclosure");
                     const img = enclosure?.getAttribute("url") ||
                         "https://via.placeholder.com/320x200/333333/FFFFFF?text=La+Presse";
