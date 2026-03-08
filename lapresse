@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>La Presse – Actualités</title>
+
+<meta http-equiv="refresh" content="600">
+
+<style>
+    body {
+        margin: 0;
+        padding: 40px;
+        background: #000000;
+        color: #ffffff;
+        font-family: Arial, sans-serif;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+
+    .logo {
+        height: 90px;
+        margin-right: 25px;
+    }
+
+    h1 {
+        font-size: 40px;
+        color: #ff3333;
+        margin: 0;
+    }
+
+    .item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 45px;
+    }
+
+    .thumb {
+        width: 320px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-right: 30px;
+    }
+
+    .title {
+        font-size: 30px;
+        line-height: 1.35;
+        max-width: 900px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/4/4f/La_Presse_logo.svg">
+    <h1>La Presse</h1>
+</div>
+
+<div id="news">Chargement…</div>
+
+<script>
+const RSS = "https://www.lapresse.ca/rss/actualites.xml";
+const PROXY = "https://api.allorigins.win/raw?url=";
+
+function loadNews() {
+    fetch(PROXY + encodeURIComponent(RSS))
+        .then(r => r.text())
+        .then(str => (new DOMParser()).parseFromString(str, "text/xml"))
+        .then(xml => {
+            const items = xml.querySelectorAll("item");
+            let html = "";
+
+            items.forEach((item, i) => {
+                if (i < 4) {
+                    const title = item.querySelector("title").textContent;
+
+                    const enclosure = item.querySelector("enclosure");
+                    const img = enclosure ? enclosure.getAttribute("url") :
+                        "https://via.placeholder.com/320x200/333333/FFFFFF?text=La+Presse";
+
+                    html += `
+                        <div class="item">
+                            <img class="thumb" src="${img}">
+                            <div class="title">• ${title}</div>
+                        </div>
+                    `;
+                }
+            });
+
+            document.getElementById("news").innerHTML = html;
+        })
+        .catch(() => {
+            document.getElementById("news").innerHTML =
+                "Impossible de charger les nouvelles.";
+        });
+}
+
+loadNews();
+</script>
+
+</body>
+</html>
